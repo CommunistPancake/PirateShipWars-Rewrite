@@ -96,9 +96,10 @@ function spawnShips()
 	starting = true
 
 	timer.Simple(4, getShipParts)
-	timer.Simple(60, function() starting = true end)
+	timer.Simple(30, function() starting = true end)
 end
 
+--probably should be in ship.lua
 function getShipParts()
 	for v = 1, 2 do
 		ShipData[v][3] = ents.GetByName("ship" .. v .. "bottom2left");
@@ -155,7 +156,105 @@ function getShipParts()
 	end
 end
 
+function detectShipBreakage(ent, info)
+	local caller = info:GetInflictor()
+	local attacker = info:GetAttacker()
+	local amount = info:GetDamage()
+	if ent:IsPlayer() then return false end
+	
+	if attacker:IsPlayer() and string.find(ent:GetName(), "ship") then
+		if attacker:Team() == TEAM_RED and string.find(ent:GetName(), "ship1") then return false end
+		if attacker:Team() == TEAM_BLUE and string.find(ent:GetName(), "ship2") then return false end
+		if ent:GetClass() ~= "prop_physics_multiplayer" and ent:GetClass() ~= "func_breakable" then
+			return false
+		end
+		if starting then return false end
+	end
+
+	local phys = ent:GetPhysicsObject()
+	local owner = findPartOwner(ent)
+
+	checkMasts = {"polefront", "mastfront", "mastback"}
+	removeEnt = {"weldpolefront", "weldmastfront", "weldpoleback"}
+	mastNames = {"polebreak", "mainbreak", "rearbreak"}
+	if owner then
+		for v = 1, 3 do
+			if ent:GetName() == "ship" .. owner .. checkMasts[v] then
+				if string.find(caller:GetClass(), "func_physbox") and ents.GetByName("ship" .. owner .. removeEnt[v]) then
+					ents.GetByname("ship" .. owner .. removeEnt[v]):Fire("Break", "", 1)
+					mastid = "s" .. owner .. mastNames[v]
+					mastCheck(mastid, owner)
+				end
+			end
+		end
+		if string.find(ent:GetName(), "ship" .. owner .. "explosive") then
+			disableShip(owner)
+		else string.find(ent:GetName(), "ship") then
+			if ent and ent:GetMass() > amount + 5 then
+				ent:Setmass(ent:GetMass() - amount)
+			else
+				ent:SetMass(5)
+			end
+			checkShipSink(owner)
+		end
+	end
+end
+hook.Add("EntityTakeDamage", "detectShipBreakage", detectShipBreakage)
+
+-- this should probably be in ship.lua
+function checkShipSink(owner)
+
+end
+
+function mastCheck(mastid, owner)
+	removeMasts = {"polefront", "mastfront", "mastback"}
+	mastNames = {"polebreak", "mainbreak", "rearbreak"}
+	for v = 1, 3 do
+		if mastid == "s" .. owner .. mastNames[v] and not starting then
+			ents.GetByName("ship" .. owner .. removeMasts[v]):Fire("Kill", "", 0)
+			teamropes = ents.FindByName("ship" .. owner .. "rope")
+			for k, v in pairs(teamropes) do
+				v:Remove()
+			end
+		end
+	end
+end
+
+function disableShip(t)
+	if not ShipData[t].disabled then
+		playerTalk(string.upper(ShipData[t].name) .. " PIRATE SHIP DISABLED")
+		ShipData[t].disabled = true
+		local thrusters = {"backwardthruster", "forwardthruster", "rightthruster", "leftthruster", "forwardthruster1"}
+		for k, v in pairs(thrusters) do
+			for i, l in pairs(ents.FindByName("ship" .. t .. v)) do
+				l:Remove()
+			end
+		end
+	end
+end
+
+function playerTalk(msg)
+	if not msg then return end
+	local msgstring = tostring(msg)
+	for o, k in pairs(player.GetAll()) do
+		k:PrintMessage(HUD_PRINTTALK, msgstring)
+	end
+end
+
 function ents.GetByName(name, returnent)
 	if returnent then return ents.FindByName(name)[1] end
 	return ents.FindByName(name)[1]:GetPhysicsObject()
+end
+
+function findPartOwner(ent, isString)
+	if isString then
+		entstring = ent
+	else
+		entstring = ent:GetName()
+	end
+	if string.find(entstring, "ship1") or string.find(entstring, "s1") then
+		return TEAM_RED
+	elseif string.find(entstring, "ship2") or string.find(entstring, "s2") then
+		return TEAM_BLUE
+	end
 end
