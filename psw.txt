@@ -1,4 +1,4 @@
-"psw2"
+"psw"
 {
 	"base"			"base"
 	"title"			"Pirate Ship Wars"
