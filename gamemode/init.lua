@@ -32,5 +32,18 @@ function GM:PlayerLoadout(ply)
 		if GetConVar("psw_pistol") then ply:Give("weapon_ppistol") end
 		if GetConVar("psw_sabre") then ply:Give("weapon_sabre") end
 		if GetConVar("psw_grenade") then ply:Give("weapon_grenade") end
+		ply:CrosshairEnable()
 	end
 end
+
+local function changeTeam(ply, cmd, args, str)
+	if not canSpawn then
+		ply:PrintMessage(HUD_PRINTTALK, "You can't change your team right now!")
+	elseif not args[0] or not team.Valid(args[0]) then
+		ply:PrintMessage(HUD_PRINTTALK, "Invalid team!")
+	else
+		ply:SetTeam(args[0])
+		ply:KillSilent()
+	end
+end
+concommand.Add("changeteam", changeTeam)
