@@ -3,6 +3,12 @@ AddCSLuaFile("cl_init.lua")
 include("shared.lua")
 
 local canSpawn = false
+local lastThink = CurTime()
+local shipsSpawned = false
+
+ShipData = {}
+ShipData[TEAM_RED] = {}
+ShipData[TEAM_BLUE] = {}
 
 CreateConVar("psw_musket", 1, FCVAR_NOTIFY)
 CreateConVar("psw_pistol", 1, FCVAR_NOTIFY)
@@ -36,6 +42,29 @@ function GM:PlayerLoadout(ply)
 	end
 end
 
+function GM:Think()
+	for k,v in pairs(player.GetAll()) do
+		if v:Alive() and v:Team() ~= TEAM_SPECTATOR then
+			if v:WaterLevel() then
+				local damage = 2 * v:WaterLevel() * (CurTime() - lastThink)
+				v.Temp = v.Temp = damage
+				if v.Temp < 70 then
+					v:SetHealth(v:Health() - damage)
+				end
+				else
+					v.Temp = v.Temp + 4 * (CurTime() - lastThink)
+				end
+			end
+		end
+	end
+	lastThink = CurTime()
+
+	if not shipsSpawned then
+		spawnShips()
+		shipsSpawned = true
+	end
+end
+
 local function changeTeam(ply, cmd, args, str)
 	if not canSpawn then
 		ply:PrintMessage(HUD_PRINTTALK, "You can't change your team right now!")
@@ -47,3 +76,8 @@ local function changeTeam(ply, cmd, args, str)
 	end
 end
 concommand.Add("changeteam", changeTeam)
+
+local function spawnShips()
+
+end
+
