@@ -22,6 +22,7 @@ CreateConVar("psw_pistol", 1, FCVAR_NOTIFY)
 CreateConVar("psw_sabre", 1, FCVAR_NOTIFY)
 CreateConVar("psw_grenade" 1, FCVAR_NOTIFY)
 CreateConVar("psw_nodoors", 0, FCVAR_NOTIFY)
+CreateConVar("psw_piratesay", 1, FCVAR_NOTIFY)
 
 function GM:PlayerSetModel(ply)
 	if ply:Team() == TEAM_SPECTATOR then return end
@@ -258,3 +259,13 @@ function findPartOwner(ent, isString)
 		return TEAM_BLUE
 	end
 end
+
+local pirateSpeak = nil
+function chatPirateSay(ply, msg)
+	if not pirateSpeak then
+		pirateSpeak = util.JSONToTable(file.Read("piratespeak.txt", "DATA"))
+	end
+	for k,v in pairs(pirateSpeak) do
+	end
+end
+hook.Add("PlayerSay", "pirateSpeak", chatPirateSay)
