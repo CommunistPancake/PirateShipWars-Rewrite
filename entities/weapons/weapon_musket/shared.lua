@@ -68,11 +68,11 @@ function SWEP:PrimaryAttack()
  
 	local ball = ents.Create("psw_ballbearing")
 	ball:SetPos( self.Owner:GetShootPos() )
-	ball:SetAngles(self.Owner:GetAimVector())
+	ball:SetAngles(self.Owner:GetAngles())
 	ball:SetOwner( self.Owner )
 	ball:Spawn()
 	ball:Activate()
-	ball:GetPhysicsObject():SetVelocity(self.Entity:GetForward() * 9000)
+	ball:GetPhysicsObject():SetVelocity(self:GetForward() * 14000)
 end 
 --SWEP:PrimaryFire\\
  
