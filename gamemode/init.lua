@@ -32,7 +32,7 @@ function GM:PlayerNoClip(ply)
 end
 
 function GM:PlayerInitialSpawn(ply)
-	ply.temp = 98.6
+	ply.Temp = 98.6
 	ply:SetTeam(TEAM_SPECTATOR)
 	ply:Spectate(OBS_MODE_ROAMING)
 	ply:PrintMessage(HUD_PRINTTALK, "Seeing errors? Need help? Press F1. Change team? Press F2")
