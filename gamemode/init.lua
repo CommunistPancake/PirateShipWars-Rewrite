@@ -132,7 +132,6 @@ function GM:Think()
 				v.Temp = v.Temp - damage
 				if v.Temp < 70 then
 					v:SetHealth(v:Health() - damage)
-				end
 				else
 					v.Temp = v.Temp + 4 * (CurTime() - lastThink)
 				end
