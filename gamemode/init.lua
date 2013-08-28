@@ -129,7 +129,7 @@ function GM:Think()
 		if v:Alive() and v:Team() ~= TEAM_SPECTATOR then
 			if v:WaterLevel() then
 				local damage = 2 * v:WaterLevel() * (CurTime() - lastThink)
-				v.Temp = v.Temp = damage
+				v.Temp = v.Temp - damage
 				if v.Temp < 70 then
 					v:SetHealth(v:Health() - damage)
 				end
