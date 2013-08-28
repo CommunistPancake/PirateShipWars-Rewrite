@@ -1,14 +1,5 @@
---local modelDefined = false
-
-if (SERVER) then
-	AddCSLuaFile( "shared.lua" )
-end
-
 if (CLIENT) then
 	SWEP.PrintName			= "Pistol"
-	SWEP.Author				= "PirateShip Wars GM9 / Metroid48 / Termy58"
---	SWEP.Contact			= "metroid48@gmail.com"
---	SWEP.Instructions		= "Aim at enemy."
 	SWEP.Slot				= 1
 	SWEP.SlotPos			= 1
 	SWEP.DrawCrosshair		= false

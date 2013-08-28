@@ -273,7 +273,7 @@ function Explosion( pos, normal, color, flags )
 		local ofs = pos + VectorRand() * math.Rand( -48, 48 );
 
 		local size = math.Rand( 16, 48 );
-		local velocity = ( VectorRand() + normal * math.Rand( 1, 6 ) ):Normalize();
+		local velocity = ( VectorRand() + normal * math.Rand( 1, 4 ) );
 		local force = velocity * math.Rand( 400, 800 ) * math.abs( normal:DotProduct( velocity ) );
 		
 		-- create the particle
@@ -309,7 +309,7 @@ function Explosion( pos, normal, color, flags )
 		local ofs = pos + VectorRand() * math.Rand( -32, 32 );
 
 		local size = math.Rand( 1, 3 );
-		local velocity = ( VectorRand() + normal * math.Rand( 1, 6 ) ):Normalize();
+		local velocity = ( VectorRand() + normal * math.Rand( 1, 4 ) );
 		local force = velocity * math.Rand( 1, 1000 ) * math.abs( normal:DotProduct( velocity ) );
 		
 		-- create the particle

@@ -1,9 +1,5 @@
 bloody = false
 
-if (SERVER) then
-	AddCSLuaFile( "shared.lua" )
-end
-
 if (CLIENT) then
 	SWEP.PrintName		= "Sabre"
 	SWEP.Slot = 0

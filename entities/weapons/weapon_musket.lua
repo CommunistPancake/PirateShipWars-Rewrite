@@ -1,9 +1,3 @@
---local modelDefined = false
-
-if (SERVER) then
-	AddCSLuaFile( "shared.lua" )
-end
-
 if (CLIENT) then
 	SWEP.PrintName			= "Musket"
 	SWEP.Author				= "Thomas Hansen"
@@ -31,7 +25,7 @@ SWEP.Primary.Damage			= 150
 SWEP.Primary.NumShots			= 1
 SWEP.Primary.Cone			= 0.02
 SWEP.Primary.ClipSize			= 1
-SWEP.Primary.Delay			= 0.3
+SWEP.Primary.Delay			= 1
 SWEP.Primary.DefaultClip		= 2
 SWEP.Primary.Automatic			= false
 SWEP.Primary.Ammo			= "buckshot"
@@ -56,6 +50,7 @@ end
 function SWEP:PrimaryAttack()
  
 	if ( !self:CanPrimaryAttack() ) then return end
+	self.Weapon:SetNextPrimaryFire(CurTime() + 8)
  
 	local ball = ents.Create("psw_ballbearing")
 	ball:SetPos( self.Owner:GetShootPos() )
@@ -64,6 +59,9 @@ function SWEP:PrimaryAttack()
 	ball:Spawn()
 	ball:Activate()
 	ball:GetPhysicsObject():SetVelocity(self:GetForward() * 14000)
+
+	self.Weapon:EmitSound("weapons/musket/"..math.random(1,3)..".mp3")
+	self:TakePrimaryAmmo(1)
 end
 
 function SWEP:SecondaryAttack()

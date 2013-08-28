@@ -3,33 +3,38 @@ AddCSLuaFile()
 ENT.Type = "anim"
 
 function ENT:PhysicsCollide(data,phys)
-	if data.Speed > 50 then
-		self.Entity:EmitSound(Sound("HEGrenade.Bounce"))
+	if (CLIENT) then
+		if data.Speed > 50 then
+			self:EmitSound(Sound("HEGrenade.Bounce"))
+		end
 	end
-	
-	local impulse = -data.Speed * data.HitNormal * .2 + (data.OurOldVelocity * -.4) --.4 .6
-	phys:ApplyForceCenter(impulse)
+	if (SERVER) then
+		local impulse = -data.Speed * data.HitNormal * .2 + (data.OurOldVelocity * -.4) --.4 .6
+		phys:ApplyForceCenter(impulse)
+	end
 end
-if (SERVER) then
+
+
 function ENT:Initialize()
 
-	self.Entity:SetModel("models/powdergrenade/powdergrenade.mdl")
-	self.Entity:PhysicsInit( SOLID_VPHYSICS )
-	self.Entity:SetMoveType( MOVETYPE_VPHYSICS )
-	self.Entity:SetSolid( SOLID_VPHYSICS )
-	self.Entity:DrawShadow( false )
-	
-	-- Don't collide with the player
-	self.Entity:SetCollisionGroup( COLLISION_GROUP_WEAPON )
-	
-	local phys = self.Entity:GetPhysicsObject()
-	
-	if (phys:IsValid()) then
-		phys:Wake()
+	if (SERVER) then
+		self:SetModel("models/powdergrenade/powdergrenade.mdl")
+		self:PhysicsInit( SOLID_VPHYSICS )
+		self:SetMoveType( MOVETYPE_VPHYSICS )
+		self:SetSolid( SOLID_VPHYSICS )
+		self:DrawShadow( false )
+			
+		-- Don't collide with the player
+		self:SetCollisionGroup( COLLISION_GROUP_WEAPON )
+		
+		local phys = self:GetPhysicsObject()
+		
+		if (phys:IsValid()) then
+			phys:Wake()
+		end
 	end
 	
 	self.timer = CurTime() + 3
-end
 end
 
 function ENT:Think()
@@ -37,11 +42,11 @@ function ENT:Think()
 		if (SERVER) then
 			local range = 512
 			local damage = 0
-			local pos = self.Entity:GetPos()
+			local pos = self:GetPos()
 			local eowner = self.eOwner
 			
-			self.Entity:EmitSound(Sound("weapons/hegrenade/explode"..math.random(3,5)..".wav"))
-			self.Entity:Remove()
+			self:EmitSound(Sound("weapons/hegrenade/explode"..math.random(3,5)..".wav"))
+			self:Remove()
 			
 			orgin_ents = ents.FindInSphere( pos, 150 )
 			for a=1, #orgin_ents do
@@ -54,8 +59,8 @@ function ENT:Think()
 			end
 		end
 		if (CLIENT) then
-			local pos = self.Entity:GetPos()
-			Explosion( pos, EyeAngles():Forward(), Color( 190, 40, 0, 255 ),  0 );
+			local pos = self:GetPos()
+			Explosion( pos, self:EyeAngles():Forward(), Color( 190, 40, 0, 255 ) );
 		end
 	end
 end

@@ -24,20 +24,20 @@ end
 
 function Ships.GetParts()
 	for v = 1, 2 do
-		PSW.ShipData[v][3] = ents.GetByName("ship" .. v .. "bottom2left");
-		PSW.ShipData[v][4] = ents.GetByName("ship" .. v .. "bottom2right");
-		PSW.ShipData[v][5] = ents.GetByName("ship" .. v .. "bottom3left");
-		PSW.ShipData[v][6] = ents.GetByName("ship" .. v .. "bottom3right");
-		PSW.ShipData[v][8] = ents.GetByName("ship" .. v .. "bottom4right");
-		PSW.ShipData[v][9] = ents.GetByName("ship" .. v .. "keel2");
-		PSW.ShipData[v][11] = ents.GetByName("ship" .. v .. "sinker2");
+		PSW.ShipData[v][3] = part("ship" .. v .. "bottom2left");
+		PSW.ShipData[v][4] = part("ship" .. v .. "bottom2right");
+		PSW.ShipData[v][5] = part("ship" .. v .. "bottom3left");
+		PSW.ShipData[v][6] = part("ship" .. v .. "bottom3right");
+		PSW.ShipData[v][8] = part("ship" .. v .. "bottom4right");
+		PSW.ShipData[v][9] = part("ship" .. v .. "keel2");
+		PSW.ShipData[v][11] = part("ship" .. v .. "sinker2");
 
-		PSW.ShipData[v][13] = ents.GetByName("ship" .. v .. "polefront");
-		PSW.ShipData[v][14] = ents.GetByName("ship" .. v .. "mastfront");
-		PSW.ShipData[v][15] = ents.GetByName("ship" .. v .. "mastback");
-		PSW.ShipData[v][16] = ents.GetByName("ship" .. v .. "door");
-		PSW.ShipData[v][17] = ents.GetByName("ship" .. v .. "explosive");
-		PSW.ShipData[v][18] = ents.GetByName("ship" .. v .. "keel");
+		PSW.ShipData[v][13] = part("ship" .. v .. "polefront");
+		PSW.ShipData[v][14] = part("ship" .. v .. "mastfront");
+		PSW.ShipData[v][15] = part("ship" .. v .. "mastback");
+		PSW.ShipData[v][16] = part("ship" .. v .. "door");
+		PSW.ShipData[v][17] = part("ship" .. v .. "explosive");
+		PSW.ShipData[v][18] = part("ship" .. v .. "keel");
 
 		PSW.ShipData[v][3]:EnableDrag(false);
 		PSW.ShipData[v][4]:EnableDrag(false);
@@ -60,7 +60,7 @@ function Ships.GetParts()
 		PSW.ShipData[v][6]:SetMass(40000);
 		PSW.ShipData[v][8]:SetMass(35000);
 
-		local barrel = ents.GetByName("ship" .. v .. "explosive", true)
+		local barrel = part("ship" .. v .. "explosive", true)
 		if barrel:GetModel() == "models/props_c17/oildrum001_explosive.mdl" then
 			barrel:SetModel("models/props_c17/woodbarrel001.mdl")
 		end
@@ -246,5 +246,22 @@ function Ships.SinkingCountdown(owner)
 			PSW.ShipData[owner][3]:SetMass(1000)
 			PSW.ShipData[owner][4]:SetMass(1000)	
 		end
+	end
+end
+
+function opposingTeam(plyteam)
+	if plyteam == TEAM_RED then
+		return TEAM_BLUE
+	else
+		return TEAM_RED
+	end
+end
+
+function part(name)
+	local ent = ents.GetByName( name )
+	if ( ent ) then 
+		ent:GetPhysicsObject()
+	else
+		return
 	end
 end

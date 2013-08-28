@@ -46,11 +46,12 @@ if ( SERVER ) then
 	function ENT:PhysicsCollide( data, physobj )
 		if data.HitEntity:IsPlayer() then
 			Msg("bravo")
+			data.HitEntity:Kill()
 		end
 		-- Play sound on bounce
 		if ( data.Speed > 60 && data.DeltaTime > 0.2 ) then
 
-			sound.Play( BounceSound, self:GetPos(), 75, math.random( 90, 120 ), math.Clamp( data.Speed / 150, 0, 1 ) )
+			--sound.Play( BounceSound, self:GetPos(), 75, math.random( 90, 120 ), math.Clamp( data.Speed / 150, 0, 1 ) )
 
 		end
 		

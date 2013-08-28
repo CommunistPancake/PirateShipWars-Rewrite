@@ -1,6 +1,5 @@
 --Moo
 if (SERVER) then
-	AddCSLuaFile( "shared.lua" )
 	SWEP.Weight				= 5
 	SWEP.AutoSwitchTo		= false
 	SWEP.AutoSwitchFrom		= true
