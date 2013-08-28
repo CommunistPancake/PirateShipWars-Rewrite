@@ -178,7 +178,7 @@ function checkShipSink(owner)
 					ShipData[owner].countdown = 35
 					ShipData[owner].sinking = true
 					sinktimer = timer.Create("SinkTimer", 1, ShipData[owner].countdown, function() sinkingCountdown(owner) end)--timer.Simple(n1, CountDown)
-					winner()
+					announceWinner()
 				end
 			end
 		end	
@@ -222,7 +222,35 @@ function sinkingCountdown(owner)
 	end
 
 	ShipData[owner].countdown = ShipData[owner].countdown - 1
-	
+
+	--very confusing if statement
+	if ShipData[owner].sinking then
+		if ShipData[owner][3]:GetMass() > 400 then
+			ShipData[owner][3]:SetMass( ShipData[owner][3]:GetMass() - 200 )
+			ShipData[owner][4]:SetMass( ShipData[owner][4]:GetMass() - 200 )
+		end	
+
+		ShipData[owner][8]:SetMass(1000)
+
+		if ShipData[owner][11]:GetMass() <= 40000 then		
+			ShipData[owner][5]:SetMass(500);
+			ShipData[owner][6]:SetMass(500);
+			ShipData[owner][11]:SetMass( ShipData[owner][11]:GetMass() + 1000 ); 
+		end
+
+		if ShipData[owner][11]:GetMass() > 40000 then
+			ShipData[owner][5]:SetMass(1000)
+			ShipData[owner][6]:SetMass(1000)
+			if ShipData[owner][9]:GetMass() > 2000 then
+				ShipData[owner][9]:SetMass(ShipData[owner][9]:GetMass()-1000)
+			end
+		elseif ShipData[owner][11]:GetMass() > 49000 then
+			ShipData[owner][10]:SetMass(35000)
+			ShipData[owner][9]:SetMass(2000)
+			ShipData[owner][3]:SetMass(1000)
+			ShipData[owner][4]:SetMass(1000)	
+		end
+	end
 end
 
 function findPartOwner(ent, isString)
