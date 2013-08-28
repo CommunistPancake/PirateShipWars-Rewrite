@@ -4,8 +4,8 @@ AddCSLuaFile("explosion.lua")
 
 AddCSLuaFile("vgui/hud.lua")
 
-include("shared.lua")
-include("ship.lua")
+TEAM_RED = 1
+TEAM_BLUE = 2
 
 PSW = {}
 PSW.CanSpawn = false
@@ -19,6 +19,9 @@ CreateConVar("psw_sabre", 1, FCVAR_NOTIFY)
 CreateConVar("psw_grenade", 1, FCVAR_NOTIFY)
 CreateConVar("psw_nodoors", 0, FCVAR_NOTIFY)
 CreateConVar("psw_rounds", 5, FCVAR_NOTIFY) --rounds per game
+
+include("ship.lua")
+include("shared.lua")
 
 function GM:PlayerSetModel(ply)
 	if ply:Team() == TEAM_SPECTATOR then return end
@@ -89,7 +92,7 @@ function GM:PlayerSelectSpawn(ply)
 
 	local chosen = false
 
-	return RandomPairs(spawnEnts)[1] -- get a random spawn point
+	return spawnEnts[math.random(#spawnEnts)] -- get a random spawn point
 end
 
 local lastThink

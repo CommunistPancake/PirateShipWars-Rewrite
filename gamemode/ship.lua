@@ -1,3 +1,5 @@
+
+
 PSW.ShipData = {}
 PSW.ShipData[TEAM_RED] = {}
 PSW.ShipData[TEAM_RED].name = "Red"
@@ -260,8 +262,6 @@ end
 function part(name)
 	local ent = ents.GetByName( name )
 	if ( ent ) then 
-		ent:GetPhysicsObject()
-	else
-		return
+		return ent
 	end
 end
