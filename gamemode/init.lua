@@ -1,21 +1,23 @@
 AddCSLuaFile("shared.lua")
 AddCSLuaFile("cl_init.lua")
+AddCSLuaFile("explosion.lua")
+
+AddCSLuaFile("vgui/hud.lua")
 
 include("shared.lua")
 include("ship.lua")
 
-canSpawn = false
-currentRound = 1
-local lastThink = CurTime()
-local shipsSpawned = false
-local starting = false
+PSW = {}
+PSW.CanSpawn = false
+PSW.CurrentRound = 1
+PSW.ShipsSpawned = false
+PSW.Starting = false
 
 CreateConVar("psw_musket", 1, FCVAR_NOTIFY)
 CreateConVar("psw_pistol", 1, FCVAR_NOTIFY)
 CreateConVar("psw_sabre", 1, FCVAR_NOTIFY)
 CreateConVar("psw_grenade", 1, FCVAR_NOTIFY)
 CreateConVar("psw_nodoors", 0, FCVAR_NOTIFY)
-CreateConVar("psw_piratesay", 1, FCVAR_NOTIFY)
 CreateConVar("psw_rounds", 5, FCVAR_NOTIFY) --rounds per game
 
 function GM:PlayerSetModel(ply)
@@ -32,13 +34,13 @@ function GM:PlayerNoClip(ply)
 end
 
 function GM:PlayerInitialSpawn(ply)
-	ply.Temp = 98.6
 	ply:SetTeam(TEAM_SPECTATOR)
 	ply:Spectate(OBS_MODE_ROAMING)
 	ply:PrintMessage(HUD_PRINTTALK, "Seeing errors? Need help? Press F1. Change team? Press F2")
 end
 
 function GM:PlayerLoadout(ply)
+	ply.Temp = 98.6
 	if ply:Team() == TEAM_SPECTATOR then
 		GAMEMODE:PlayerSpawnAsSpectator(ply)
 		ply:CrosshairDisable()
@@ -87,43 +89,10 @@ function GM:PlayerSelectSpawn(ply)
 
 	local chosen = false
 
-	for k,v in pairs(spawnEnts) do
-		nearest = ents.FindInSphere(v:GetPos(), 10)
-		angles = v:GetAngles()
-		v:SetAngles(Angle(0, angles.y, 0))
-		if v:IsValid() and v:IsInWorld() then
-			local blk = false
-			netTarget = v
-			for i, o in pairs(nearest) do
-				if o:GetClass() == "trigger_teleport" then
-					if ents.GetByName(o:GetKeyValues().target, true) then
-						newTarget = ents.GetByName(o:GetKeyValues().target, true)
-					end
-				end
-			end
-			for o, l in pairs(ents.FindInSphere(netTarget:GetPos() or v, 150)) do
-				blk = l:IsValid() and l:IsPlayer()
-			end
-
-			if not blk then
-				if not ply.lastspawn then
-					chosen = true
-					ply.lastspawn = v
-					return v
-				elseif ply.lastspawn ~= v then
-					chosen = true
-					ply.lastspawn = v
-					return v
-				end
-			end
-		end
-	end
-
-	if not chosen then 
-		return ply 
-	end
+	return RandomPairs(spawnEnts)[1] -- get a random spawn point
 end
 
+local lastThink
 function GM:Think()
 	for k,v in pairs(player.GetAll()) do
 		if v:Alive() and v:Team() ~= TEAM_SPECTATOR then
@@ -140,19 +109,28 @@ function GM:Think()
 	end
 	lastThink = CurTime()
 
-	if not shipsSpawned then
-		spawnShips()
-		shipsSpawned = true
+	if not PSW.ShipsSpawned then
+		Ships.SpawnShips()
+		PSW.ShipsSpawned = true
 	end
 end
 
 -- NOTE: override this function if you want to use a custom map cycle (GLMVS, ULX, etc)
 -- This function should return true if a map has been chosen, else the vanilla map cycle will be used
-function changeMap()
+function PSW.ChangeMap()
 	return false
 end
+hook.Add("PSWChangeMap", "pswChangeMap", PSW.ChangeMap)
 
-function changeTeam(ply, cmd, args, str)
+function PSW.AnnounceWinner()
+	local winner = ""
+	if ShipData[TEAM_RED].sinking then winner = "Red" else winner = "Blue" end
+	for k,v in pairs(player.GetAll()) do
+		v:PrintMessage(HUD_PRINTCENTER, "The "..winner.." Pirates Win!")
+	end
+end
+
+local function changeTeam(ply, cmd, args, str)
 	if not canSpawn then
 		ply:PrintMessage(HUD_PRINTTALK, "You can't change your team right now!")
 	elseif not args[0] or not team.Valid(args[0]) then
@@ -182,23 +160,7 @@ function changeTeam(ply, cmd, args, str)
 end
 concommand.Add("changeteam", changeTeam)
 
-function announceWinner()
-	local winner = ""
-	if ShipData[TEAM_RED].sinking then winner = "Red" else winner = "Blue" end
-	for k,v in pairs(player.GetAll()) do
-		v:PrintMessage(HUD_PRINTCENTER, "The "..winner.." Pirates Win!")
-	end
-end
-
-function playerTalk(msg)
-	if not msg then return end
-	local msgstring = tostring(msg)
-	for o, k in pairs(player.GetAll()) do
-		k:PrintMessage(HUD_PRINTTALK, msgstring)
-	end
-end
-
-function handleChatCommands(ply, msg, public)
+local function handleChatCommands(ply, msg, public)
 	local text = string.Explode(" ", msg)
 	if text[1] == "!switch" and text[2] ~= nil then
 		ply:ConCommand("changeteam "..text[2])
@@ -207,17 +169,39 @@ function handleChatCommands(ply, msg, public)
 end
 hook.Add("PlayerSay", "chatCommands", handleChatCommands)
 
-function enableSpawn()
+local function enableSpawn()
 	canSpawn = true
 	for k,v in pairs(player.GetAll()) do
 		v:KillSilent()
 		v:AddDeaths(-1)
 	end
 end
+timer.Simple(4, enableSpawn)
+
+function player.BroadcastMessage(msg)
+	if not msg then return end
+	local msgstring = tostring(msg)
+	for o, k in pairs(player.GetAll()) do
+		k:PrintMessage(HUD_PRINTTALK, msgstring)
+	end
+end
 
 function ents.GetByName(name, returnent)
 	if returnent then return ents.FindByName(name)[1] end
 	return ents.FindByName(name)[1]:GetPhysicsObject()
+end
+
+function ents.GetOwner(ent, isString)
+	if isString then
+		entstring = ent
+	else
+		entstring = ent:GetName()
+	end
+	if string.find(entstring, "ship1") or string.find(entstring, "s1") then
+		return TEAM_RED
+	elseif string.find(entstring, "ship2") or string.find(entstring, "s2") then
+		return TEAM_BLUE
+	end
 end
 
 function team.GetOpposing(t)
