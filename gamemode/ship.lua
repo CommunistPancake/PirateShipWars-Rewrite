@@ -62,8 +62,8 @@ function Ships.GetParts()
 		PSW.ShipData[v][6]:SetMass(40000);
 		PSW.ShipData[v][8]:SetMass(35000);
 
-		local barrel = part("ship" .. v .. "explosive", true)
-		if barrel:GetModel() == "models/props_c17/oildrum001_explosive.mdl" then
+		local barrel = ents.GetByName("ship" .. v .. "explosive", true)
+		if IsValid(barrel) and barrel:GetModel() == "models/props_c17/oildrum001_explosive.mdl" then
 			barrel:SetModel("models/props_c17/woodbarrel001.mdl")
 		end
 
@@ -101,19 +101,19 @@ function Ships.TakeDamage(ent, info)
 		for v = 1, 3 do
 			if ent:GetName() == "ship" .. owner .. checkMasts[v] then
 				if string.find(caller:GetClass(), "func_physbox") and ents.GetByName("ship" .. owner .. removeEnt[v]) then
-					ents.GetByName("ship" .. owner .. removeEnt[v]):Fire("Break", "", 1)
+					ents.GetByName("ship" .. owner .. removeEnt[v], true):Fire("Break", "", 1)
 					mastid = "s" .. owner .. mastNames[v]
-					ships.CheckMasts(mastid, owner)
+					Ships.CheckMasts(mastid, owner)
 				end
 			end
 		end
 		if string.find(ent:GetName(), "ship" .. owner .. "explosive") then
 			Ships.Disable(owner)
 		elseif string.find(ent:GetName(), "ship") then
-			if IsValid(ent) and ent:GetMass() > amount + 5 then
-				ent:SetMass(ent:GetMass() - amount)
+			if IsValid(phys) and phys:GetMass() > amount + 5 then
+				phys:SetMass(phys:GetMass() - amount)
 			else
-				ent:SetMass(5)
+				phys:SetMass(5)
 			end
 			Ships.CheckSink(owner)
 		end
@@ -172,90 +172,14 @@ function Ships.CheckSink(owner)
 				PSW.ShipData[owner][6]:SetMass(1000)
 				PSW.ShipData[owner][11]:SetMass(15000)
 			else
-				if not PSW.ShipData[opposingTeam(owner)].sinking then
+				if not PSW.ShipData[team.GetOpposing(owner)].sinking then
 					PSW.ShipData[owner].countdown = 35
 					PSW.ShipData[owner].sinking = true
-					timer.Create("SinkTimer", 1, PSW.ShipData[owner].countdown, function() Ships.SinkingCountdown(owner) end)
-					PSW.AnnounceWinner()
+					Rounds.Cleanup(owner)
+					Rounds.AnnounceWinner()
 				end
 			end
 		end	
-	end
-end
-
-function Ships.SinkingCountdown(owner)
-	if PSW.ShipData[owner].countdown == 30 then
-		canSpawn = false
-	elseif PSW.ShipData[owner].countdown == 7 and PSW.ShipData[v].sinking then
-		for k,v in pairs(player.GetAll()) do
-			v:StripWeapons()
-			v:Spectate(OBS_MODE_ROAMING)
-			v:SetTeam(TEAM_SPECTATE)
-			v:CrosshairDisable()
-		end
-	elseif PSW.ShipData[owner].countdown == 5 and PSW.ShipData[owner].sinking then
-		spawnShips()
-	elseif PSW.ShipData[owner].countdown == 1 then
-		currentRound = currentRound + 1
-		if currentRound == GetConVarNumber("psw_rounds") then
-			player.BroadcastMessage("Last round before map change!")
-		end
-		if currentRound == GetConVarNumber("psw_rounds") + 1 then
-			player.BroadcastMessage("Changing map!")
-			Msg("Changing map")
-			local changeMap = hook.Call("PSWChangeMap") -- should return true if it exists
-			if not changeMap then timer.Simple(1, game.LoadNextMap) end
-		end
-		team.AddScore(team.GetOpposing(owner), 30)
-		timer.Remove("SinkTimer")
-		canSpawn = true
-
-		for k,v in pairs(player.GetAll()) do
-			v:UnSpectate()
-			v:KillSilent()
-			v:Respawn()
-			v:ConCommand("r_cleardecals")
-			v:PrintMessage(HUD_PRINTCENTER, "Sink the enemy pirate ship!")
-		end
-	end
-
-	PSW.ShipData[owner].countdown = PSW.ShipData[owner].countdown - 1
-
-	--very confusing if statement
-	if PSW.ShipData[owner].sinking then
-		if PSW.ShipData[owner][3]:GetMass() > 400 then
-			PSW.ShipData[owner][3]:SetMass( PSW.ShipData[owner][3]:GetMass() - 200 )
-			PSW.ShipData[owner][4]:SetMass( PSW.ShipData[owner][4]:GetMass() - 200 )
-		end	
-
-		PSW.ShipData[owner][8]:SetMass(1000)
-
-		if PSW.ShipData[owner][11]:GetMass() <= 40000 then		
-			PSW.ShipData[owner][5]:SetMass(500);
-			PSW.ShipData[owner][6]:SetMass(500);
-			PSW.ShipData[owner][11]:SetMass( PSW.ShipData[owner][11]:GetMass() + 1000 ); 
-		end
-
-		if PSW.ShipData[owner][11]:GetMass() > 40000 then
-			PSW.ShipData[owner][5]:SetMass(1000)
-			PSW.ShipData[owner][6]:SetMass(1000)
-			if PSW.ShipData[owner][9]:GetMass() > 2000 then
-				PSW.ShipData[owner][9]:SetMass(PSW.ShipData[owner][9]:GetMass()-1000)
-			end
-		elseif PSW.ShipData[owner][11]:GetMass() > 49000 then
-			PSW.ShipData[owner][10]:SetMass(35000)
-			PSW.ShipData[owner][9]:SetMass(2000)
-			PSW.ShipData[owner][3]:SetMass(1000)
-			PSW.ShipData[owner][4]:SetMass(1000)	
-		end
-	end
-end
-
-function opposingTeam(plyteam)
-	if plyteam == TEAM_RED then
-		return TEAM_BLUE
-	else
-		return TEAM_RED
 	end
 end
 

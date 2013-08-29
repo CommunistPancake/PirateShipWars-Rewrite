@@ -3,13 +3,13 @@ AddCSLuaFile("cl_init.lua")
 AddCSLuaFile("explosion.lua")
 
 AddCSLuaFile("vgui/hud.lua")
+AddCSLuaFile("vgui/teamselect.lua")
 
 TEAM_RED = 1
 TEAM_BLUE = 2
 
 PSW = {}
 PSW.CanSpawn = false
-PSW.CurrentRound = 1
 PSW.ShipsSpawned = false
 PSW.Starting = false
 
@@ -21,6 +21,7 @@ CreateConVar("psw_nodoors", 0, FCVAR_NOTIFY)
 CreateConVar("psw_rounds", 5, FCVAR_NOTIFY) --rounds per game
 
 include("ship.lua")
+include("rounds.lua")
 include("shared.lua")
 
 function GM:PlayerSetModel(ply)
@@ -50,7 +51,7 @@ function GM:PlayerLoadout(ply)
 	else
 		if GetConVar("psw_musket"):GetBool() then ply:Give("weapon_musket") end
 		if GetConVar("psw_pistol"):GetBool() then ply:Give("weapon_ppistol") end
-		if GetConVar("psw_sabre"):GetBool() then ply:Give("weapon_sword") end
+		if GetConVar("psw_sabre"):GetBool() then ply:Give("weapon_sabre") end
 		if GetConVar("psw_grenade"):GetBool() then ply:Give("weapon_grenade") end
 		ply:CrosshairEnable()
 	end
@@ -97,6 +98,7 @@ end
 
 local lastThink
 function GM:Think()
+	lastThink = lastThink or CurTime()
 	for k,v in pairs(player.GetAll()) do
 		if v:Alive() and v:Team() ~= TEAM_SPECTATOR then
 			if v:WaterLevel() then
@@ -125,41 +127,37 @@ function PSW.ChangeMap()
 end
 hook.Add("PSWChangeMap", "pswChangeMap", PSW.ChangeMap)
 
-function PSW.AnnounceWinner()
-	local winner = ""
-	if ShipData[TEAM_RED].sinking then winner = "Red" else winner = "Blue" end
-	for k,v in pairs(player.GetAll()) do
-		v:PrintMessage(HUD_PRINTCENTER, "The "..winner.." Pirates Win!")
-	end
-end
-
-local function changeTeam(ply, cmd, args, str)
-	if not canSpawn then
+function PSW.ChangeTeam(ply, t)
+	if not PSW.CanSpawn then
 		ply:PrintMessage(HUD_PRINTTALK, "You can't change your team right now!")
-	elseif not args[0] or not team.Valid(args[0]) then
+	elseif not t or not team.Valid(t) then
 		ply:PrintMessage(HUD_PRINTTALK, "Invalid team!")
-	elseif args[0] == TEAM_RED or args[0] == TEAM_BLUE then
+	elseif t == TEAM_RED or t == TEAM_BLUE then
 		local numRed = team.NumPlayers(TEAM_RED)
 		local numBlue = team.NumPlayers(TEAM_BLUE)
-		if numRed > numBlue and args[0] == TEAM_RED then
+		if numRed > numBlue and t == TEAM_RED then
 			ply:PrintMessage(HUD_PRINTTALK, "There are too many players on that team!")
-		elseif numBlue < numRed and args[0] == TEAM_BLUE then
+		elseif numBlue < numRed and t == TEAM_BLUE then
 			ply:PrintMessage(HUD_PRINTTALK, "There are too many players on that team!")
 		else
 			ply.spectating = false
-			ply:SetTeam(args[0])
+			ply:SetTeam(t)
 			ply:KillSilent()
 			ply:AddDeaths(-1)
-			ply:PrintMessage(HUD_PRINTTALK, "Switching to "..ShipData[args[0]].name.." team")
+			ply:PrintMessage(HUD_PRINTTALK, "Switching to "..PSW.ShipData[t].name.." team")
 		end
 	else
 		ply.spectating = true --spectating by choice
 		ply:Spectate(OBS_MODE_ROAMING)
-		ply:SetTeam(args[0])
+		ply:SetTeam(t)
 		ply:KillSilent()
 		ply:AddDeaths(-1)
 		ply:PrintMessage(HUD_PRINTTALK, "Switching to spectator")
 	end
+end
+
+local function changeTeam(ply, cmd, args, str)
+	PSW.ChangeTeam(ply, args[0])
 end
 concommand.Add("changeteam", changeTeam)
 
