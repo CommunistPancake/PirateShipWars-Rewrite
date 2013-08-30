@@ -1,0 +1,55 @@
+//====== Pirate Ship Wars =======
+//
+// Purpose: General game definition file (.fgd) 
+//
+//=============================================================================
+
+@include "base.fgd"
+@include "halflife2.fgd"
+@include "garrysmod.fgd"
+
+@PointClass base(Targetname) = info_gamemode : "Defines the gamemode"
+[
+	GamemodeName(string) : "Gamemode Name" : "psw" : "The gamemode (by name) to use"	
+]
+
+@PointClass base(PlayerSpawn) studio("models/editor/playerstart.mdl") = psw_redspawn :
+	"Red spawn"
+[
+]
+
+@PointClass base(PlayerSpawn) studio("models/editor/playerstart.mdl") = psw_redbrig :
+	"Red brig"
+[
+]
+
+@PointClass base(PlayerSpawn) studio("models/editor/playerstart.mdl") = psw_bluespawn :
+	"Blue spawn"
+[
+]
+
+@PointClass base(PlayerSpawn) studio("models/editor/playerstart.mdl") = psw_bluebrig :
+	"Blue brig"
+[
+]
+
+@PointClass base(Targetname, Angles) color(255 0 0) studio() = psw_cannonbase : 
+	"This entity spawns everything related to a single cannon"
+[
+]
+
+@PointClass base(Targetname, Angles) color(255 0 0) studio() = psw_barrel : 
+	"The barrel which can disable the ship"
+[
+]
+
+@PointClass base(Targetname, Angles) color(0 255 0) studio() = logic_pirateshipwars : 
+	"Pirate Ship Wars Logic"
+[
+	output OnStartWarmup(void) : "Warmup, pre round"
+	output OnStartRound(void) : "Start the round"
+	output OnEndRound(void) : "End the round"
+	output OnBlueWins(void) : "Blue wins the game, called at the same time OnEndRound is"
+	output OnRedWins(void) : "Red wins the game, called at the same time OnEndRound is"
+	
+]

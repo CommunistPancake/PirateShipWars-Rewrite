@@ -7,8 +7,9 @@ if (CLIENT) then
 	
 	killicon.Add("weapon_pmusket", "deathnotify/pistol_kill", Color(255,255,255,255))
 end
-
+if (SERVER) then
 SWEP.HoldType				= "shotgun" --maybe server-only
+end
 
 SWEP.ViewModel				= "models/brownbess/v_brownbess.mdl"
 SWEP.WorldModel				= "models/brownbess/w_brownbess.mdl"
