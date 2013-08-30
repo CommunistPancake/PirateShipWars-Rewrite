@@ -24,19 +24,6 @@ include("ship.lua")
 include("rounds.lua")
 include("shared.lua")
 
-function GM:PlayerSetModel(ply)
-	if ply:Team() == TEAM_SPECTATOR then return end
-	if ply:Team() == TEAM_RED then
-		ply:SetModel("models/player/pirate/pirate_redd.mdl")
-	else
-		ply:SetModel("models/player/pirate/pirate_blue.mdl")
-	end
-end
-
-function GM:PlayerNoClip(ply)
-	return false
-end
-
 function GM:PlayerInitialSpawn(ply)
 	ply:SetTeam(TEAM_SPECTATOR)
 	ply:Spectate(OBS_MODE_ROAMING)
