@@ -1,11 +1,23 @@
 Rounds = {}
 Rounds.CurrentRound = 1
+Rounds.Wins = {}
+Rounds.Wins[TEAM_RED] = 0
+Rounds.Wins[TEAM_BLUE] = 0
+Rounds.StartTime = CurTime()
 
 function Rounds.AnnounceWinner()
 	local winner = ""
-	if PSW.ShipData[TEAM_RED].sinking then winner = "Red" else winner = "Blue" end
+	if PSW.ShipData[TEAM_RED].sinking then 
+		winner = "Red" 
+		Rounds.Wins[TEAM_RED] = Rounds.Wins[TEAM_RED] + 1
+	else 
+		winner = "Blue" 
+		Rounds.Wins[TEAM_BLUE] = Rounds.Wins[TEAM_BLUE] + 1
+	end
+	Rounds.StartTime = CurTime()
 	for k,v in pairs(player.GetAll()) do
 		v:PrintMessage(HUD_PRINTCENTER, "The "..winner.." Pirates Win!")
+		Rounds.UpdatePlayer(v)
 	end
 end
 
@@ -80,4 +92,12 @@ function Rounds.CleanupCountdown(owner)
 			PSW.ShipData[owner][4]:SetMass(1000)	
 		end
 	end
+end
+
+function Rounds.UpdatePlayer(ply)
+	umsg.Start("PSWRoundUpdate", ply)
+		umsg.Long(Rounds.Wins[TEAM_RED])
+		umsg.Long(Rounds.Wins[TEAM_BLUE])
+		umsg.Long(Rounds.StartTime)
+	umsg.End()
 end

@@ -1,12 +1,12 @@
-
-
 PSW.ShipData = {}
 PSW.ShipData[TEAM_RED] = {}
 PSW.ShipData[TEAM_RED].name = "Red"
 PSW.ShipData[TEAM_RED].countdown = 35
+PSW.ShipData[TEAM_RED].health = 0 --total health of the ship
 PSW.ShipData[TEAM_BLUE] = {}
 PSW.ShipData[TEAM_BLUE].name = "Blue"
 PSW.ShipData[TEAM_BLUE].countdown = 35
+PSW.ShipData[TEAM_BLUE].health = 0
 
 Ships = {}
 
@@ -40,6 +40,22 @@ function Ships.GetParts()
 		PSW.ShipData[v][16] = part("ship" .. v .. "door");
 		PSW.ShipData[v][17] = part("ship" .. v .. "explosive");
 		PSW.ShipData[v][18] = part("ship" .. v .. "keel");
+
+		-- there is probably a better way to do this
+		--[[PSW.ShipData[v].health = 
+			PSW.ShipData[v][3]:Health() +
+			PSW.ShipData[v][4]:Health() +
+			PSW.ShipData[v][5]:Health() +
+			PSW.ShipData[v][6]:Health() +
+			PSW.ShipData[v][8]:Health() +
+			PSW.ShipData[v][9]:Health() +
+			PSW.ShipData[v][11]:Health() +
+			PSW.ShipData[v][13]:Health() +
+			PSW.ShipData[v][14]:Health() +
+			PSW.ShipData[v][15]:Health() +
+			PSW.ShipData[v][16]:Health() +
+			PSW.ShipData[v][17]:Health() +
+			PSW.ShipData[v][18]:Health()]]--
 
 		PSW.ShipData[v][3]:EnableDrag(false);
 		PSW.ShipData[v][4]:EnableDrag(false);
@@ -181,6 +197,25 @@ function Ships.CheckSink(owner)
 			end
 		end	
 	end
+end
+
+--called when a player joins the server in the middle of a round
+function Ships.GetHealth(owner)
+	--[[local health = 
+		PSW.ShipData[v][3]:Health() +
+		PSW.ShipData[v][4]:Health() +
+		PSW.ShipData[v][5]:Health() +
+		PSW.ShipData[v][6]:Health() +
+		PSW.ShipData[v][8]:Health() +
+		PSW.ShipData[v][9]:Health() +
+		PSW.ShipData[v][11]:Health() +
+		PSW.ShipData[v][13]:Health() +
+		PSW.ShipData[v][14]:Health() +
+		PSW.ShipData[v][15]:Health() +
+		PSW.ShipData[v][16]:Health() +
+		PSW.ShipData[v][17]:Health() +
+		PSW.ShipData[v][18]:Health()
+	return health]]--
 end
 
 function part(name)

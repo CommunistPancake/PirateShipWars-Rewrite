@@ -4,6 +4,8 @@ AddCSLuaFile("explosion.lua")
 
 AddCSLuaFile("vgui/hud.lua")
 AddCSLuaFile("vgui/teamselect.lua")
+AddCSLuaFile("vgui/shiphealth.lua")
+AddCSLuaFile("vgui/rounddisplay.lua")
 
 TEAM_RED = 1
 TEAM_BLUE = 2
@@ -28,6 +30,7 @@ function GM:PlayerInitialSpawn(ply)
 	ply:SetTeam(TEAM_SPECTATOR)
 	ply:Spectate(OBS_MODE_ROAMING)
 	ply:PrintMessage(HUD_PRINTTALK, "Seeing errors? Need help? Press F1. Change team? Press F2")
+	Rounds.UpdatePlayer(ply)
 end
 
 function GM:PlayerLoadout(ply)
@@ -115,9 +118,7 @@ end
 hook.Add("PSWChangeMap", "pswChangeMap", PSW.ChangeMap)
 
 function PSW.ChangeTeam(ply, t)
-	if not PSW.CanSpawn then
-		ply:PrintMessage(HUD_PRINTTALK, "You can't change your team right now!")
-	elseif not t or not team.Valid(t) then
+	if not t or not team.Valid(t) then
 		ply:PrintMessage(HUD_PRINTTALK, "Invalid team!")
 	elseif t == TEAM_RED or t == TEAM_BLUE then
 		local numRed = team.NumPlayers(TEAM_RED)
@@ -144,7 +145,7 @@ function PSW.ChangeTeam(ply, t)
 end
 
 local function changeTeam(ply, cmd, args, str)
-	PSW.ChangeTeam(ply, args[0])
+	PSW.ChangeTeam(ply, tonumber(args[1]))
 end
 concommand.Add("changeteam", changeTeam)
 

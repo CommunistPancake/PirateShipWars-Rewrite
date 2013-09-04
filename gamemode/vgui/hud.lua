@@ -1,3 +1,6 @@
+include("shiphealth.lua")
+include("rounddisplay.lua")
+
 HUD = {}
 HUD.Items = {}
 
@@ -95,11 +98,13 @@ local function drawHealthHUD()
 		surface.ScreenHeight() - mediumHeight - 10,
 		Color(125, 80, 50, 255),
 		TEXT_ALIGN_LEFT,
-		tEXT_ALIGN_LEFT)
+		TEXT_ALIGN_LEFT)
 end
 
 table.insert(HUD.Items, drawAmmoHUD)
 table.insert(HUD.Items, drawHealthHUD)
+table.insert(HUD.Items, ShipHealth.DrawDisplay)
+table.insert(HUD.Items, RoundDisplay.DrawDisplay)
 
 hook.Add("HUDShouldDraw", "hideHud", HUD.Hide)
 hook.Add("HUDPaint", "drawHud", HUD.Draw)
